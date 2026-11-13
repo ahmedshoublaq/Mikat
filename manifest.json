@@ -1,0 +1,25 @@
+{
+  "name": "ميقات — مواقيت الصلاة والمصحف والتسبيح والقبلة",
+  "short_name": "ميقات",
+  "description": "تطبيق إسلامي شامل للمواقيت، المصحف الشريف، التسبيح، والقبلة.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0d0e12",
+  "theme_color": "#0f1226",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
