@@ -1,1 +1,0 @@
-window.MIKAT_FIREBASE={"firebaseConfig": {"apiKey": "AIzaSyD0eMEkJn8Jdw-xi3ZCsuEv3oYcQt5Rygg", "authDomain": "mikat-admin.firebaseapp.com", "projectId": "mikat-admin", "appId": "1:136441559512:web:8b8aa8978692ed1c9d9aad"}};
