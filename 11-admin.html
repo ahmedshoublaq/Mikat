@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0f1226">
+<title>ميقات | لوحة الأدمن</title>
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Readex+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Readex Pro',sans-serif;background:#0d0e12;color:#edebff;line-height:1.7;min-height:100vh;padding:1rem 1rem 3rem}
+.wrap{max-width:560px;margin:0 auto}
+header{display:flex;justify-content:space-between;align-items:center;margin:.5rem 0 1.2rem}
+.brand{font-family:'Aref Ruqaa',serif;font-size:1.9rem;color:#fff}
+.tag{font-size:.75rem;color:#f1ebd4;border:1px solid rgba(241,235,212,.4);border-radius:999px;padding:.1rem .7rem}
+.card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:1.1rem;margin-bottom:1rem}
+h2{font-size:1.05rem;font-weight:600;margin-bottom:.7rem;color:#f1ebd4}
+label{display:block;font-size:.82rem;color:#b9bbca;margin:.6rem 0 .2rem}
+input,select{width:100%;background:#161824;border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:.6rem .8rem;color:#edebff;font:inherit}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid #f1ebd4;outline-offset:2px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.times{display:grid;grid-template-columns:1fr 1fr;gap:.2rem .6rem}
+.hint{font-size:.72rem;color:#8d90a6;margin-top:.15rem;min-height:1.1em}
+button{font:inherit;border:0;border-radius:12px;padding:.65rem 1rem;cursor:pointer;background:#f1ebd4;color:#1b1d33;font-weight:600}
+button.ghost{background:transparent;color:#edebff;border:1px solid rgba(255,255,255,.22);font-weight:400}
+button.danger{background:transparent;color:#ff9aa8;border:1px solid rgba(255,154,168,.45);font-weight:400}
+button:disabled{opacity:.5;cursor:default}
+.actions{display:flex;gap:.6rem;margin-top:1rem;flex-wrap:wrap}
+.msg{margin-top:.8rem;font-size:.85rem;padding:.55rem .8rem;border-radius:12px;display:none}
+.msg.ok{display:block;background:rgba(120,220,160,.12);color:#9ee6bd}
+.msg.err{display:block;background:rgba(255,120,140,.12);color:#ff9aa8}
+.user{display:flex;justify-content:space-between;align-items:center;gap:.6rem;font-size:.82rem;color:#b9bbca;margin-bottom:1rem;word-break:break-all}
+.item{display:flex;justify-content:space-between;gap:.6rem;align-items:center;border-top:1px solid rgba(255,255,255,.08);padding:.6rem 0;font-size:.82rem}
+.item:first-child{border-top:0}
+.item b{color:#fff;font-weight:500}
+.item small{display:block;color:#8d90a6}
+.item .b{display:flex;gap:.4rem}
+.item button{padding:.3rem .7rem;font-size:.78rem}
+.note{font-size:.75rem;color:#8d90a6;margin-top:.5rem}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><span class="brand">ميقات</span><span class="tag">لوحة الأدمن</span></header>
+
+<div id="cfgMissing" class="card" hidden>
+<h2>الإعداد ناقص</h2>
+<p>افتح ملف <b>firebase-config.js</b> وحط الـ apiKey بتاع مشروع Firebase مكان <b>PASTE_API_KEY_HERE</b>، وبعدها حدّث الصفحة.</p>
+</div>
+
+<section id="loginCard" class="card" hidden>
+<h2>تسجيل دخول الأدمن</h2>
+<form id="loginForm" autocomplete="on">
+<label for="email">الإيميل</label>
+<input id="email" type="email" autocomplete="username" required dir="ltr">
+<label for="password">كلمة السر</label>
+<input id="password" type="password" autocomplete="current-password" required dir="ltr">
+<div class="actions"><button id="loginBtn" type="submit">دخول</button></div>
+<div id="loginMsg" class="msg" role="alert"></div>
+</form>
+<p class="note">الدخول والحفظ بيتحققوا في سيرفر Firebase، مش في الصفحة. أي حساب غير حسابك مش هيقدر يعدّل.</p>
+</section>
+
+<main id="app" hidden>
+<div class="user"><span id="whoami"></span><button id="logout" class="ghost" type="button">خروج</button></div>
+
+<section class="card">
+<h2>تعديل المواقيت</h2>
+<div class="row">
+<div><label for="country">الدولة</label><select id="country"></select></div>
+<div><label for="city">المدينة</label><select id="city"></select></div>
+</div>
+<label for="date">التاريخ</label>
+<input id="date" type="date" required dir="ltr">
+<div class="times" id="timesGrid"></div>
+<p class="note">اتركه فاضي لأي صلاة عايزها تفضل من الـ API. الفجر وقت واحد زي الموقع.</p>
+<div class="actions">
+<button id="save" type="button">حفظ</button>
+<button id="clear" type="button" class="danger">حذف التعديل</button>
+</div>
+<div id="msg" class="msg" role="status"></div>
+</section>
+
+<section class="card">
+<h2>التعديلات المحفوظة</h2>
+<div id="list"><p class="note">جاري التحميل...</p></div>
+</section>
+</main>
+</div>
+
+<script src="./firebase-config.js"></script>
+<script type="module">
+const $=id=>document.getElementById(id);
+const ARAB_LOCATIONS={
+'فلسطين':{method:3,cities:['غزة','القدس','رام الله','نابلس','الخليل','جنين','بيت لحم']},
+'السعودية':{method:4,cities:['مكة المكرمة','المدينة المنورة','الرياض','جدة','الدمام','الطائف','تبوك']},
+'الإمارات':{method:16,cities:['دبي','أبوظبي','الشارقة','عجمان','العين','رأس الخيمة','الفجيرة']},
+'قطر':{method:10,cities:['الدوحة','الريان','الوكرة','الخور']},
+'الكويت':{method:9,cities:['مدينة الكويت','حولي','الفروانية','الجهراء','الأحمدي']},
+'البحرين':{method:3,cities:['المنامة','المحرق','الرفاع','مدينة حمد']},
+'عُمان':{method:3,cities:['مسقط','صلالة','صحار','نزوى','صور']},
+'الأردن':{method:23,cities:['عمّان','الزرقاء','إربد','العقبة','السلط','مادبا']},
+'مصر':{method:5,cities:['القاهرة','الإسكندرية','الجيزة','بورسعيد','المنصورة','طنطا','أسيوط','الأقصر','أسوان']},
+'لبنان':{method:3,cities:['بيروت','طرابلس','صيدا','صور','زحلة']},
+'سوريا':{method:3,cities:['دمشق','حلب','حمص','حماة','اللاذقية','طرطوس']},
+'العراق':{method:3,cities:['بغداد','البصرة','الموصل','أربيل','النجف','كربلاء','كركوك']},
+'اليمن':{method:3,cities:['صنعاء','عدن','تعز','الحديدة','إب','حضرموت']},
+'السودان':{method:3,cities:['الخرطوم','أم درمان','بورتسودان','ود مدني','الأبيض']},
+'ليبيا':{method:3,cities:['طرابلس','بنغازي','مصراتة','الزاوية','سبها']},
+'تونس':{method:18,cities:['تونس','صفاقس','سوسة','القيروان','بنزرت','قابس']},
+'الجزائر':{method:19,cities:['الجزائر','وهران','قسنطينة','عنابة','البليدة','سطيف']},
+'المغرب':{method:21,cities:['الرباط','الدار البيضاء','مراكش','فاس','طنجة','أكادير','مكناس']},
+'موريتانيا':{method:3,cities:['نواكشوط','نواذيبو','روصو','كيهيدي']},
+'جيبوتي':{method:3,cities:['مدينة جيبوتي','علي صبيح','تاجورة']},
+'الصومال':{method:3,cities:['مقديشو','هرجيسا','بوصاصو','كيسمايو']},
+'جزر القمر':{method:3,cities:['موروني','موتسامودو','فومبوني']}
+};
+const KEYS=['fajr','sunrise','dhuhr','asr','maghrib','isha'];
+const NAMES={fajr:'الفجر',sunrise:'الشروق',dhuhr:'الظهر',asr:'العصر',maghrib:'المغرب',isha:'العشاء'};
+const COUNTRY_METHODS={'السعودية':4,'الإمارات':16,'قطر':10,'الكويت':9,'الأردن':23,'مصر':5,'الجزائر':19,'تونس':18,'المغرب':21,'تركيا':13};
+const HHMM=/^([01]?\d|2[0-3]):[0-5]\d$/;
+const docId=(country,city,date)=>[country,city,date].join('|');
+const toMin=s=>{const [h,m]=s.split(':').map(Number);return h*60+m};
+const SDK='https://www.gstatic.com/firebasejs/12.19.0/';
+
+function show(el,type,text){el.className='msg '+type;el.textContent=text}
+function hide(el){el.className='msg';el.textContent=''}
+
+const cfg=window.MIKAT_FIREBASE;
+const fc=cfg&&cfg.firebaseConfig;
+if(!fc||!fc.apiKey||/PASTE/.test(fc.apiKey)){
+$('cfgMissing').hidden=false;
+}else{
+init().catch(e=>{$('cfgMissing').hidden=false;$('cfgMissing').querySelector('p').textContent='تعذر تحميل Firebase. تأكد من الاتصال وحدّث الصفحة.'});
+}
+
+async function init(){
+const [{initializeApp},A,F]=await Promise.all([import(SDK+'firebase-app.js'),import(SDK+'firebase-auth.js'),import(SDK+'firebase-firestore.js')]);
+const app=initializeApp(fc);
+const auth=A.getAuth(app);
+const db=F.getFirestore(app);
+if(cfg.emulator){
+A.connectAuthEmulator(auth,`http://${cfg.emulator.host}:${cfg.emulator.authPort}`,{disableWarnings:true});
+F.connectFirestoreEmulator(db,cfg.emulator.host,cfg.emulator.firestorePort);
+}
+
+// location pickers
+const cs=$('country'),ci=$('city');
+cs.innerHTML=Object.keys(ARAB_LOCATIONS).map(c=>`<option>${c}</option>`).join('');
+cs.value='فلسطين';
+function fillCities(){ci.innerHTML=ARAB_LOCATIONS[cs.value].cities.map(c=>`<option>${c}</option>`).join('')}
+fillCities();
+cs.addEventListener('change',()=>{fillCities();loadCurrent()});
+ci.addEventListener('change',loadCurrent);
+const dateIn=$('date');
+function todayKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+dateIn.value=todayKey();
+dateIn.addEventListener('change',loadCurrent);
+$('timesGrid').innerHTML=KEYS.map(k=>`<div><label for="t-${k}">${NAMES[k]}</label><input id="t-${k}" type="time" dir="ltr"><div class="hint" id="h-${k}"></div></div>`).join('');
+
+let apiTimes=null;
+async function loadApi(){
+apiTimes=null;
+KEYS.forEach(k=>$('h-'+k).textContent='');
+const country=cs.value,city=ci.value,date=dateIn.value;
+if(!date)return;
+try{
+const [y,m,d]=date.split('-');
+const method=ARAB_LOCATIONS[country].method||COUNTRY_METHODS[country]||3;
+const r=await fetch(`https://api.aladhan.com/v1/timingsByAddress/${d}-${m}-${y}?address=${encodeURIComponent(city+','+country)}&method=${method}`);
+const j=await r.json();
+if(country!==cs.value||city!==ci.value||date!==dateIn.value)return;
+if(j.code!==200||!j.data)return;
+const t=j.data.timings;
+apiTimes={fajr:t.Fajr,sunrise:t.Sunrise,dhuhr:t.Dhuhr,asr:t.Asr,maghrib:t.Maghrib,isha:t.Isha};
+for(const k of KEYS){apiTimes[k]=String(apiTimes[k]).split(' ')[0];$('h-'+k).textContent='API: '+apiTimes[k]}
+}catch{}
+}
+
+async function loadCurrent(){
+hide($('msg'));
+KEYS.forEach(k=>$('t-'+k).value='');
+const country=cs.value,city=ci.value,date=dateIn.value;
+loadApi();
+if(!date)return;
+try{
+const s=await F.getDoc(F.doc(db,'overrides',docId(country,city,date)));
+if(country!==cs.value||city!==ci.value||date!==dateIn.value)return;
+if(s.exists()){const t=s.data().times||{};KEYS.forEach(k=>{if(t[k])$('t-'+k).value=t[k]});show($('msg'),'ok','فيه تعديل محفوظ للمدينة والتاريخ دول.')}
+}catch(e){show($('msg'),'err','تعذر قراءة التعديل المحفوظ.')}
+}
+
+function collect(){
+const times={};
+for(const k of KEYS){const v=$('t-'+k).value.trim();if(v){if(!HHMM.test(v))throw new Error('وقت '+NAMES[k]+' غير صحيح');times[k]=v}}
+return times;
+}
+function validate(times){
+if(!Object.keys(times).length)throw new Error('اكتب وقت واحد على الأقل، أو استخدم حذف التعديل.');
+const merged={};
+for(const k of KEYS){const v=times[k]||(apiTimes&&apiTimes[k]);if(v)merged[k]=v}
+const order=KEYS.filter(k=>merged[k]);
+for(let i=1;i<order.length;i++){
+if(toMin(merged[order[i]])<=toMin(merged[order[i-1]]))throw new Error(`الترتيب غلط: ${NAMES[order[i]]} لازم يكون بعد ${NAMES[order[i-1]]}.`);
+}
+}
+function errText(e){
+const c=e&&e.code||'';
+if(c.includes('permission-denied'))return 'الحساب ده مش مسموح له يعدّل. لازم تدخل بحساب الأدمن.';
+if(c.includes('unavailable'))return 'مفيش اتصال بالسيرفر. جرّب تاني.';
+return e&&e.message?e.message:'حصل خطأ.';
+}
+
+$('save').addEventListener('click',async()=>{
+const btn=$('save');
+try{
+const times=collect();validate(times);
+btn.disabled=true;
+const country=cs.value,city=ci.value,date=dateIn.value;
+await F.setDoc(F.doc(db,'overrides',docId(country,city,date)),{country,city,date,times,updatedAt:F.serverTimestamp(),updatedBy:auth.currentUser.uid});
+show($('msg'),'ok','اتحفظ ✓ ظاهر دلوقتي في الموقع لـ '+city+' بتاريخ '+date+'.');
+refreshList();
+}catch(e){show($('msg'),'err',errText(e))}
+finally{btn.disabled=false}
+});
+$('clear').addEventListener('click',async()=>{
+try{
+await F.deleteDoc(F.doc(db,'overrides',docId(cs.value,ci.value,dateIn.value)));
+KEYS.forEach(k=>$('t-'+k).value='');
+show($('msg'),'ok','اتحذف التعديل. المواقيت رجعت من الـ API.');
+refreshList();
+}catch(e){show($('msg'),'err',errText(e))}
+});
+
+async function refreshList(){
+const box=$('list');
+try{
+const snap=await F.getDocs(F.query(F.collection(db,'overrides'),F.limit(200)));
+const rows=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+if(!rows.length){box.innerHTML='<p class="note">مفيش تعديلات محفوظة.</p>';return}
+box.innerHTML=rows.map((r,i)=>{
+const t=r.times||{};
+const txt=KEYS.filter(k=>t[k]).map(k=>`${NAMES[k]} ${t[k]}`).join(' · ');
+return `<div class="item"><div><b>${esc(r.city)}، ${esc(r.country)}</b> · <span dir="ltr">${esc(r.date)}</span><small>${esc(txt)}</small></div><div class="b"><button class="ghost" data-i="${i}" data-a="edit">تعديل</button><button class="danger" data-i="${i}" data-a="del">حذف</button></div></div>`}).join('');
+box._rows=rows;
+}catch(e){box.innerHTML='<p class="note">تعذر تحميل القائمة.</p>'}
+}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+$('list').addEventListener('click',async e=>{
+const b=e.target.closest('button');if(!b)return;
+const r=$('list')._rows[+b.dataset.i];if(!r)return;
+if(b.dataset.a==='edit'){cs.value=r.country;fillCities();ci.value=r.city;dateIn.value=r.date;loadCurrent();window.scrollTo({top:0,behavior:'smooth'})}
+else{try{await F.deleteDoc(F.doc(db,'overrides',r.id));refreshList();show($('msg'),'ok','اتحذف.');loadCurrent()}catch(err){show($('msg'),'err',errText(err))}}
+});
+
+// auth
+$('loginForm').addEventListener('submit',async e=>{
+e.preventDefault();
+const btn=$('loginBtn');btn.disabled=true;hide($('loginMsg'));
+try{await A.signInWithEmailAndPassword(auth,$('email').value.trim(),$('password').value);$('password').value=''}
+catch(err){show($('loginMsg'),'err',['auth/invalid-credential','auth/wrong-password','auth/user-not-found','auth/invalid-email'].includes(err.code)?'الإيميل أو كلمة السر غلط.':err.code==='auth/too-many-requests'?'محاولات كتير. استنى شوية وجرّب تاني.':'تعذر تسجيل الدخول.')}
+finally{btn.disabled=false}
+});
+$('logout').addEventListener('click',()=>A.signOut(auth));
+A.onAuthStateChanged(auth,u=>{
+$('loginCard').hidden=!!u;
+$('app').hidden=!u;
+if(u){$('whoami').textContent='داخل بـ '+u.email;loadCurrent();refreshList()}
+});
+}
+</script>
+</body>
+</html>
