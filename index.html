@@ -1105,6 +1105,7 @@ border-top-color:#e7bd73;opacity:0;pointer-events:none
   <button class="close" id="closeAyahMenu" type="button" aria-label="إغلاق">×</button>
 </div>
 
+<script src="./firebase-config.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -1316,7 +1317,7 @@ return `<circle class="dot" id="dot-${k}" data-prayer="${k}" cx="${x.toFixed(1)}
 
 function buildChips(){
 $('times').innerHTML=DISPLAY_KEYS.map(k=>`<li id="chip-${k}"><button type="button" data-prayer="${k}"><b>${NAMES[k]}</b><span>${fmt(T[k])}</span></button></li>`).join('');
-$('src').textContent=`مصدر المواقيت: AlAdhan API — ${currentCity}${currentCountry?', '+currentCountry:''}`;
+$('src').textContent=`مصدر المواقيت: AlAdhan API — ${currentCity}${currentCountry?', '+currentCountry:''}`+(overrideKeys.length?' (مع تعديل يدوي لبعض المواقيت)':'');
 }
 
 document.addEventListener('click',e=>{
@@ -1429,6 +1430,60 @@ $('dashProgress').style.width=Math.max(0,Math.min(100,ratio*100))+'%';
 updateDateDisplay();
 }
 
+/* =========================
+Admin overrides (read-only on the public site)
+Firestore doc: overrides/{country|city|YYYY-MM-DD}, field times: {fajr,sunrise,dhuhr,asr,maghrib,isha} as "HH:MM".
+Anything missing, invalid, slow or offline falls back to the API times.
+========================= */
+let overrideKeys=[];
+let overrideSeq=0;
+let fbPromise=null;
+const FB_SDK='https://www.gstatic.com/firebasejs/12.19.0/';
+const HHMM=/^([01]?\d|2[0-3]):[0-5]\d$/;
+
+function overrideDocId(country,city,dateKey){return [country,city,dateKey].join('|')}
+
+function fbLoad(){
+if(fbPromise)return fbPromise;
+fbPromise=(async()=>{
+const cfg=window.MIKAT_FIREBASE;
+const fc=cfg&&cfg.firebaseConfig;
+if(!fc||!fc.apiKey||/PASTE/.test(fc.apiKey))return null;
+const [{initializeApp},fs]=await Promise.all([import(FB_SDK+'firebase-app.js'),import(FB_SDK+'firebase-firestore.js')]);
+const db=fs.getFirestore(initializeApp(fc));
+if(cfg.emulator)fs.connectFirestoreEmulator(db,cfg.emulator.host,cfg.emulator.firestorePort);
+return {db,fs};
+})().catch(()=>null);
+return fbPromise;
+}
+
+async function applyOverride(city,country,dateKey,seq){
+if(!city||!country||!dateKey)return;
+try{
+const fb=await fbLoad();
+if(!fb)return;
+const snap=await Promise.race([
+fb.fs.getDoc(fb.fs.doc(fb.db,'overrides',overrideDocId(country,city,dateKey))),
+new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),6000))
+]);
+if(seq!==overrideSeq||!snap.exists())return;
+const times=(snap.data()||{}).times||{};
+const next={...T};
+const keys=[];
+for(const k of ALL_KEYS){
+const v=times[k];
+if(typeof v==='string'&&HHMM.test(v)){next[k]=parseMin(v);keys.push(k)}
+}
+if(!keys.length)return;
+for(let i=1;i<ALL_KEYS.length;i++){
+if(!(next[ALL_KEYS[i]]>next[ALL_KEYS[i-1]]))return;
+}
+T=next;
+overrideKeys=keys;
+buildDots();buildChips();update();
+}catch{}
+}
+
 function applyPrayerData(data,city,country,loc={}){
 if(!data?.timings)throw Error('Invalid prayer data');
 const t=data.timings;
@@ -1446,6 +1501,8 @@ currentCity=city||'الموقع الحالي';
 currentCountry=country||'';
 prayerTimezone=data.meta?.timezone||null;
 prayerDateKey=getDateKey(prayerTimezone);
+overrideKeys=[];
+const ovSeq=++overrideSeq;
 prayerLocation=loc;
 sim=null;
 selectedPrayer=null;
@@ -1460,6 +1517,7 @@ $('locationTrigger').textContent=currentCity==='موقعك الحالي'?'موق
 buildDots();
 buildChips();
 update();
+if(loc&&loc.type==='address')applyOverride(currentCity,currentCountry,prayerDateKey,ovSeq);
 }
 
 async function fetchPrayerTimesByAddress(city,country,methodOverride=null){
