@@ -2029,6 +2029,10 @@ $('mushaf').innerHTML=d.data.ayahs.map(a=>{
   return `<span class="ayah" data-ayah="${a.numberInSurah}" title="اضغط للحفظ أو الإلغاء">${text}<span class="num">${AR(a.numberInSurah)}</span></span> `;
 }).join('');
 
+// Hide only the extra heading when the rendered first ayah already has it.
+const firstDisplayedAyah=$('mushaf').querySelector('.ayah')?.firstChild?.textContent||'';
+if(currentSurahNumber!==1&&currentSurahNumber!==9&&normAr(firstDisplayedAyah).startsWith(normAr($('bismillahContainer').textContent)))$('bismillahContainer').style.display='none';
+
 restoreQuranState();
 
 if(scrollAyah){
